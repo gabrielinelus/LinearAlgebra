@@ -2,12 +2,13 @@
 #define MATRIXUTIL_H
 
 #include <matrix.h>
+#include <fstream>
 
 template <typename T>
 class MatrixUtil
 {
   private:
-    static const constexpr long double EPS = 1e-16;
+    static const constexpr long double EPS = 1e-20;
   public:
     static bool compareEquals(Matrix<T> A, Matrix<T> B, T epsilon = EPS);
     /// Compare equality between two matrices. Returns true if the component
@@ -34,9 +35,10 @@ class MatrixUtil
     /// the boolean lossless decides whether to compute the solution x to the
     /// system A*x = b using a stable QR decomposition.
 
-
     static void HouseholderQR(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R);
     /// Decompose the matrix A into a orthonormal matrix Q and R = Q^T * A.
+
+    static void Reader(Matrix<T> &M, string fileName);
 };
 
 template <typename T>
@@ -159,5 +161,19 @@ void MatrixUtil<T>::HouseholderQR(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
     Q = savedA * Q;
 }
 
+template <typename T>
+void MatrixUtil<T>::Reader(Matrix<T> &M, string fileName)
+{
+    ifstream inputStream(fileName.c_str());
+    int R, C;
+    inputStream >> R >> C;
+    M.reset(Matrix<T>(R, C));
+    for (int i = 0; i < R; ++i)
+        for (int j = 0; j < C; ++j) {
+            T scalar;
+            inputStream >> scalar;
+            M.set(i, j, scalar);
+        }
+}
 
 #endif // MATRIXUTIL_H
