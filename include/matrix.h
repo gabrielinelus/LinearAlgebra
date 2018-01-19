@@ -278,8 +278,8 @@ void Matrix<T>::setColumn(int index, const Matrix<T>& other)
 template <typename T>
 void Matrix<T>::set(int row, int col, T value)
 {
-    if (fabs(value - (int) value) < EPS / 10)
-        value = (int) value;
+    ///if (fabs(value - (int) value) ) Turns out that this is not allowed for sufficiently large examples.
+        ///value = (int) value;
     d_rows[row][col] = value;
     d_cachedTranspose = false;
 }

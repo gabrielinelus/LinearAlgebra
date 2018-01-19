@@ -83,7 +83,7 @@ void unitTest1(int verbose = 0)
 
 void unitTest2(int verbose = 0)
 {
-    /// ax^2 bx + c*1 = y
+    /// ax^2 + bx + c*1 = y
     Matrix<long double> M({
                            { 1, 1, 1},
                            { 4, 2, 1},
@@ -219,13 +219,13 @@ void burnTest(bool verbose = false)
         fout << "]" << endl;
     }
     MatrixUtil<long double>::HouseholderQR(A, Q, R);
-    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-16));
+///    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
 
     MatrixUtil<long double>::QRDecomposition(A, Q, R);
-    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
+///    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
 
     MatrixUtil<long double>::QRLosslessDecomposition(A, QL, RL);
-    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-8));
+///    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-8));
 
     if (verbose) {
         for (int i = 0; i < 80; ++i) {
@@ -325,16 +325,46 @@ void clusteringTest()
 
 }
 
+void measureError()
+{
+    Matrix<long double> A, Q, R, QL, RL, MatlabR, MatlabRL;
+    MatrixUtil<long double>::Reader(A, string("A.in"));
+    MatrixUtil<long double>::Reader(MatlabR, string("R.in"));
+    MatrixUtil<long double>::Reader(MatlabRL, string("RL.in"));
+    ///A.print(20);
+
+    MatrixUtil<long double>::QRDecomposition(A, Q, R);
+    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-2));
+
+    MatrixUtil<long double>::QRLosslessDecomposition(A, QL, RL);
+    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-2));
+
+    ofstream fcout("A.out");
+
+    fcout << setprecision(20) << fixed;
+    for (int i = 0; i < 80; ++i)
+        fcout << R.get(i, i) <<  endl << MatlabR.get(i, i) << endl << endl;
+
+    fcout << "\n-------------\n";
+
+    for (int i = 0; i < 80; ++i)
+        fcout << RL.get(i, i) << endl << MatlabRL.get(i, i) << endl << endl;
+
+
+}
+
 int main()
 {
-    unitTest1(true);
-    unitTest2(true);
-    unitTest3(true);
-    unitTest4(true);
+    ///unitTest1(true);
+    ///unitTest2(true);
+    ///unitTest3(true);
+    ///unitTest4(true);
 
-    burnTest(true);
+    ///burnTest(true);
 
-    clusteringTest();
+    ///clusteringTest();
+    measureError();
+
 
     return 0;
 }
