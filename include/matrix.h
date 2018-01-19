@@ -50,10 +50,10 @@ class Matrix
     void colSwap(int i, int j);
     /// swap two columns of a matrix
 
-    void addToRow(int i, const Matrix& other);
+    void addToRow(int i, const Matrix<T>& other);
     /// add to a row of a matrix a given row in matrix form
 
-    void addToCol(int j, const Matrix& other);
+    void addToCol(int j, const Matrix<T>& other);
     /// add to the column of a matrix a given column in matrix form
 
     void normalize();
@@ -62,9 +62,9 @@ class Matrix
     void reset(const Matrix &other);
     /// Reset the contents of this matrix to the ones of other.
 
-    void setColumn(int index, const Matrix& other);
+    void setColumn(int index, const Matrix<T>& other);
 
-    void setRow(int index, const Matrix& other);
+    void setRow(int index, const Matrix<T>& other);
 
     void set(int row, int col, T value);
     /// Set the value at specified 'row' and specified 'col' to 'value'.
@@ -103,74 +103,28 @@ class Matrix
     /// Get the 'index'th column of the Matrix in a Matrix column form.
 
 /// Free operators
-    bool operator == (const Matrix& other);
+    bool operator == (const Matrix<T>& other);
     /// Returns if the two matrices are equal
 
-    bool operator != (const Matrix& other);
+    bool operator != (const Matrix<T>& other);
     /// Returns if the two matrices are different
 
+    Matrix<T>& operator *= (const Matrix<T>& rhs);
+    /// Multiply 'this' by 'rhs' matrix.
+
+    Matrix<T>& operator *= (const T& rhs);
+    /// Multiply 'this' by 'rhs' scalar.
+
+    Matrix<T>& operator += (const Matrix<T>& rhs);
+    /// Add to 'this' matrix the 'rhs' matrix
+
+    Matrix<T>& operator -= (const Matrix<T>& rhs);
+    /// Subtract from 'this' matrix the 'rhs' matrix
+
+    Matrix<T>& operator /= (const T& rhs);
+    /// Divide 'this' matrix by the 'rhs' scalar
+
 /// Friend Operators
-    friend Matrix operator + (Matrix lhs, Matrix rhs)
-    {
-        Matrix<T> rez(lhs.numRows(), lhs.numCols());
-        for (int i = 0; i < lhs.numRows(); ++i)
-            for (int j = 0; j < lhs.numCols(); ++j)
-                rez.set(i, j, lhs.get(i, j) + rhs.get(i, j));
-
-        return rez;
-    }
-    /// Sum two matrices
-
-    friend Matrix operator - (Matrix lhs, Matrix rhs)
-    {
-        Matrix<T> rez(lhs.numRows(), lhs.numCols());
-        for (int i = 0; i < lhs.numRows(); ++i)
-            for (int j = 0; j < lhs.numCols(); ++j)
-                rez.set(i, j, lhs.get(i, j) - rhs.get(i, j));
-
-        return rez;
-    }
-    /// Subtract two matrices
-
-    friend Matrix operator*(Matrix mat, T scalar)
-    {
-        Matrix<T> rez(mat.numRows(), mat.numCols());
-        for (int i = 0; i < mat.numRows(); ++i)
-            for (int j = 0; j < mat.numCols(); ++j)
-                rez.set(i,j, mat.get(i,j) * scalar);
-        return rez;
-    }
-    /// Multiply a matrix by a scalar
-
-    friend Matrix operator/(Matrix mat, T scalar)
-    {
-        Matrix<T> rez(mat.numRows(), mat.numCols());
-        for (int i = 0; i < mat.numRows(); ++i)
-            for (int j = 0; j < mat.numCols(); ++j)
-                rez.set(i,j, mat.get(i,j) / scalar);
-        return rez;
-    }
-    /// Divide a matrix by a scalar
-
-    friend Matrix operator*(Matrix lhs, Matrix rhs)
-    {
-        if (lhs.numRows() == 1 && lhs.numCols() == 1) /// Treat the case when lhs is scalar
-            return rhs * lhs.get(0, 0);
-        if (rhs.numRows() == 1 && rhs.numCols() == 1) /// Treat the case when rhs is scalar
-            return lhs * rhs.get(0, 0);
-        if (lhs.numCols() != rhs.numRows()) {
-            cout << "here";
-        }
-        assert(lhs.numCols() == rhs.numRows() && "matrix multiplication impossible!");
-
-        Matrix<T> rez(lhs.numRows(), rhs.numCols());
-        for (int i = 0; i < lhs.numRows(); ++i)
-            for (int j = 0; j < rhs.numCols(); ++j)
-                for (int k = 0; k < lhs.numCols(); ++k)
-                    rez.set(i, j, rez.get(i, j) + lhs.get(i, k) * rhs.get(k, j));
-        return rez;
-    }
-    /// Multiply two matrices
 
     friend ostream& operator<<(ostream& out, Matrix& other)
     {
@@ -444,7 +398,7 @@ Matrix<T> Matrix<T>::operator()(int index) const
 /*******************************************************/
 
 /*******************************************************/
-///               Free Operators                      ///
+///                Free Operators                     ///
 /*******************************************************/
 
 template <typename T>
@@ -465,8 +419,121 @@ bool Matrix<T>::operator != (const Matrix& other)
     return !(this == other);
 }
 
+template <typename T>
+Matrix<T>& Matrix<T>::operator *= (const Matrix<T>& rhs) {
+
+    if (numRows() == 1 && numCols() == 1) { /// Treat the case when lhs is scalar
+        Matrix<T> rez(rhs);
+        rez *= get(0, 0);
+        reset(rez);
+        return *this;
+    }
+
+    if (rhs.numRows() == 1 && rhs.numCols() == 1) { /// Treat the case when rhs is scalar
+        Matrix<T> rez(*this);
+        rez *= rhs.get(0, 0);
+        reset(rez);
+        return *this;
+    }
+
+    assert(numCols() == rhs.numRows() && "matrix multiplication impossible!");
+
+    Matrix<T> rez(numRows(), rhs.numCols());
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < rhs.numCols(); ++j)
+            for (int k = 0; k < numCols(); ++k)
+                rez.set(i, j, rez.get(i, j) + get(i, k) * rhs.get(k, j));
+
+    reset(rez);
+    return *this;
+}
+
+template <typename T>
+Matrix<T>& Matrix<T>::operator *= (const T& rhs) {
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            set(i,j, get(i,j) * rhs);
+    return *this;
+}
+
+template <typename T>
+Matrix<T>& Matrix<T>::operator += (const Matrix<T>& rhs) {
+    assert(numRows() == rhs.numRows() &&
+           numCols() == rhs.numCols() &&
+           "matrix addition impossible!");
+
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            set(i, j, get(i, j) + rhs.get(i, j));
+
+    return *this;
+}
+
+template <typename T>
+Matrix<T>& Matrix<T>::operator -= (const Matrix<T>& rhs) {
+    assert(numRows() == rhs.numRows() &&
+           numCols() == rhs.numCols() &&
+           "matrix addition impossible!");
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            set(i, j, get(i, j) - rhs.get(i, j));
+
+    return *this;
+}
+
+template <typename T>
+Matrix<T>& Matrix<T>::operator /= (const T& rhs){
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            set(i,j, get(i,j) / rhs);
+    return *this;
+}
+
 /*******************************************************/
-///            End of   Free Operators                ///
+///              End of Free Operators                ///
+/*******************************************************/
+
+/*******************************************************/
+///                 Free Functions                    ///
+/*******************************************************/
+
+template <typename T>
+Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    Matrix<T> aux(lhs);
+    aux *= rhs;
+    return aux;
+}
+
+template <typename T>
+Matrix<T> operator*(const Matrix<T>& lhs, const T& rhs) {
+    Matrix<T> aux(lhs);
+    aux *= rhs;
+    return aux;
+}
+
+template <typename T>
+Matrix<T> operator+(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    Matrix<T> aux(lhs);
+    aux += rhs;
+    return aux;
+}
+
+template <typename T>
+Matrix<T> operator-(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    Matrix<T> aux(lhs);
+    aux -= rhs;
+    return aux;
+}
+
+template <typename T>
+Matrix<T> operator/(const Matrix<T>& lhs, const T& rhs) {
+    Matrix<T> aux(lhs);
+    aux /= rhs;
+    return aux;
+}
+
+/*******************************************************/
+///              End of Free Functions                ///
 /*******************************************************/
 
 #endif /// MATRIX_H

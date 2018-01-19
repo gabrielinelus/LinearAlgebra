@@ -149,7 +149,7 @@ void MatrixUtil<T>::HouseholderQR(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
         vk.set(1,0, vk.get(1,0) + sign(x.get(1, 0)) * x.frobeniusNorm());
         vk.normalize();
         Matrix<T> aux = A(k, m, k, n);
-        aux = vk*(vk.transpose()*aux) * (-2);
+        aux = vk*(vk.transpose()*aux) * (-2.0L);
         for (int i = 0; i < aux.numRows(); ++i)
             for (int j = 0; j < aux.numCols(); ++j)
                 A.set(k + i, k + j, A.get(k + i, k + j) + aux.get(i, j));
