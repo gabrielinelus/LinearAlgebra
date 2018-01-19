@@ -60,15 +60,20 @@ bool MatrixUtil<T>::compareEquals(Matrix<T> A, Matrix<T> B, T eps)
 template <typename T>
 void MatrixUtil<T>::QRDecomposition(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
 {   /// Decompose matrix A in the output parameters Q and R such that A = QR.
-    Q = Matrix<T>(A.numRows(), A.numCols());
-    for (int i = 0; i < A.numCols(); ++i) {
-        Matrix<T> qi = A(i); /// extract i'th column
-        for (int j = 0; j < i; ++j)
-            qi = qi - Q(j).transpose() * A(i) * Q(j);
-        qi.normalize();
-        Q.setColumn(i, qi);
+    int m = A.numRows(), n = A.numCols();
+
+    Q = Matrix<T>(m, n);
+    R = Matrix<T>(m, n);
+    Matrix<T> V = A;
+
+    for (int j = 0; j < n; ++j) {
+        for (int i = 0; i < j; ++i) {
+            R.set(i, j, (Q(i).transpose() * A(j)).get(0, 0));
+            V.setColumn(j, V(j) - Q(i) * R.get(i, j));
+        }
+        R.set(j, j, V(j).frobeniusNorm());
+        Q.setColumn(j, V(j) / R.get(j, j));
     }
-    R = Q.transpose() * A;
 }
 
 template <typename T>
