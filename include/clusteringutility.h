@@ -88,7 +88,7 @@ T ClusteringUtility<T>::KMeansFixedK(Matrix<T> X, int rounds, int K, vector<int>
 
             }
 
-            if (fabs(currentRound - last) < 1e-12)
+            if (fabs(currentRound - last) < 1e-16)
                 break;
             last = currentRound;
 
@@ -103,7 +103,7 @@ T ClusteringUtility<T>::KMeansFixedK(Matrix<T> X, int rounds, int K, vector<int>
                         crtMean = crtMean + X[i];
                         numberElements += 1;
                     }
-                crtMean = crtMean / numberElements;
+                crtMean = crtMean / (1.0L*numberElements);
                 Matrix<T> meanK = means[k];
                 ///cout << "Old mean: " << meanK << "\n";
                 ///cout << "New mean: " << crtMean << "\n";

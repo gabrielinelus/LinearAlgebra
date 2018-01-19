@@ -13,7 +13,7 @@ using namespace std;
 
 void unitTest1(int verbose = 0)
 {
-        Matrix<long double> init({
+    Matrix<long double> init({
                               { 1,2,2},
                               {-1,1,2},
                               {-1,0,1},
@@ -327,12 +327,12 @@ void clusteringTest()
 
 int main()
 {
-    ///unitTest1(true);
-    ///unitTest2(true);
-    ///unitTest3(true);
-    ///unitTest4(true);
+    unitTest1(true);
+    unitTest2(true);
+    unitTest3(true);
+    unitTest4(true);
 
-    ///burnTest(true);
+    burnTest(true);
 
     clusteringTest();
 
