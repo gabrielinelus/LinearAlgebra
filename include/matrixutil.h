@@ -63,7 +63,7 @@ void MatrixUtil<T>::QRDecomposition(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
     int m = A.numRows(), n = A.numCols();
 
     Q = Matrix<T>(m, n);
-    R = Matrix<T>(m, n);
+    R = Matrix<T>(n, n);
     Matrix<T> V = A;
 
     for (int j = 0; j < n; ++j) {
@@ -79,15 +79,19 @@ void MatrixUtil<T>::QRDecomposition(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
 template <typename T>
 void MatrixUtil<T>::QRLosslessDecomposition(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
 {
-    Q = A;
-    for (int i = 0; i < A.numCols(); ++i) {
-        Matrix<T> qi = Q(i);
-        qi.normalize();
-        Q.setColumn(i, qi);
-        for (int j = i + 1; j < A.numCols(); ++j)
-            Q.setColumn(j, Q(j) - Q(i).transpose() * Q(j) * Q(i));
+    int m = A.numRows(), n = A.numCols();
+
+    Q = Matrix<T>(m, n);
+    R = Matrix<T>(n, n);
+    Matrix<T> V = A;
+    for (int i = 0; i < n; ++i) {
+        R.set(i, i, V(i).frobeniusNorm());
+        Q.setColumn(i, V(i) / R.get(i, i));
+        for (int j = i + 1; j < n; ++j) {
+            R.set(i, j, (Q(i).transpose() * V(j)).get(0, 0));
+            V.setColumn(j, V(j) - Q(i) * R.get(i, j));
+        }
     }
-    R = Q.transpose() * A;
 }
 
 template <typename T>

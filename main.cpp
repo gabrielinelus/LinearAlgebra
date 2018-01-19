@@ -362,8 +362,8 @@ int main()
 
     ///burnTest(true);
 
-    ///clusteringTest();
-    measureError();
+    clusteringTest();
+    ///measureError();
 
 
     return 0;
