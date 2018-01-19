@@ -58,12 +58,11 @@ class Matrix
     void normalize();
     /// Divide by the Frobenius Norm.
 
-    void reset(const Matrix &other);
-    /// Reset the contents of this matrix to the ones of other.
-
     void setColumn(int index, const Matrix<T>& other);
+    /// Set the column 'index' to equal 'other'.
 
     void setRow(int index, const Matrix<T>& other);
+    /// Set the row 'index' to equal other.
 
     void set(int row, int col, T value);
     /// Set the value at specified 'row' and specified 'col' to 'value'.
@@ -210,16 +209,22 @@ void Matrix<T>::colScale(int j, T scalar)
 template <typename T>
 void Matrix<T>::rowSwap(int i, int j)
 {
-    for (int col = 0; col < numCols(); ++col)
-        swap(d_rows[i][col], d_rows[j][col]);
+    for (int col = 0; col < numCols(); ++col) {
+        T aux = get(i, col);
+        set(i, col, get(j, col));
+        set(j, col, aux);
+    }
     d_cachedTranspose = false;
 }
 
 template <typename T>
 void Matrix<T>::colSwap(int i, int j)
 {
-    for (int row = 0; row < numRows(); ++row)
-        swap(d_rows[row][i], d_rows[row][j]);
+    for (int row = 0; row < numRows(); ++row) {
+        T aux = get(row, i);
+        set(row, i, get(row, j));
+        set(row, j, aux);
+    }
     d_cachedTranspose = false;
 }
 
@@ -245,15 +250,6 @@ void Matrix<T>::normalize()
     for (int i = 0; i < numRows(); ++i)
         for (int j = 0; j < numCols(); ++j)
             set(i, j, get(i, j) / norm);
-}
-
-template <typename T>
-void Matrix<T>::reset(const Matrix<T>& other)
-{
-    d_rows.clear();
-    d_rows = other.d_rows;
-    d_transpose = other.d_transpose;
-    d_cachedTranspose = other.d_cachedTranspose;
 }
 
 template <typename T>
@@ -311,12 +307,13 @@ T Matrix<T>::frobeniusNorm()
 template <typename T>
 const void Matrix<T>::print(int indent) const
 {
-    if(d_rows.empty()) {
+    if(numRows() == 0 || numCols() == 0) {
         cout << "empty\n";
         return;
     }
-    for (auto it : d_rows) {
-        for (auto jt : it) {
+    for (int i = 0; i < numRows(); ++i) {
+        for (int j = 0; j < numCols(); ++j) {
+            T jt = get(i, j);
             stringstream s;
             s << setprecision(indent-4) << fixed;
             s << jt;
@@ -413,14 +410,14 @@ Matrix<T>& Matrix<T>::operator *= (const Matrix<T>& rhs) {
     if (numRows() == 1 && numCols() == 1) { /// Treat the case when lhs is scalar
         Matrix<T> rez(rhs);
         rez *= get(0, 0);
-        reset(rez);
+        (*this) = rez;
         return *this;
     }
 
     if (rhs.numRows() == 1 && rhs.numCols() == 1) { /// Treat the case when rhs is scalar
         Matrix<T> rez(*this);
         rez *= rhs.get(0, 0);
-        reset(rez);
+        (*this) = rez;
         return *this;
     }
 
@@ -432,7 +429,7 @@ Matrix<T>& Matrix<T>::operator *= (const Matrix<T>& rhs) {
             for (int k = 0; k < numCols(); ++k)
                 rez.set(i, j, rez.get(i, j) + get(i, k) * rhs.get(k, j));
 
-    reset(rez);
+    (*this) = rez;
     return *this;
 }
 

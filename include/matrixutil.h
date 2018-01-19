@@ -179,7 +179,7 @@ void MatrixUtil<T>::Reader(Matrix<T> &M, string fileName)
     ifstream inputStream(fileName.c_str());
     int R, C;
     inputStream >> R >> C;
-    M.reset(Matrix<T>(R, C));
+    M = Matrix<T>(R, C);
     for (int i = 0; i < R; ++i)
         for (int j = 0; j < C; ++j) {
             T scalar;
