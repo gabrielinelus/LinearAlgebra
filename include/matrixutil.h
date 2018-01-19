@@ -8,7 +8,7 @@ template <typename T>
 class MatrixUtil
 {
   private:
-    static const constexpr long double EPS = 1e-20;
+    static const constexpr long double EPS = 1e-16;
   public:
     static bool compareEquals(Matrix<T> A, Matrix<T> B, T epsilon = EPS);
     /// Compare equality between two matrices. Returns true if the component
@@ -39,6 +39,9 @@ class MatrixUtil
     /// Decompose the matrix A into a orthonormal matrix Q and R = Q^T * A.
 
     static void Reader(Matrix<T> &M, string fileName);
+    /// Read a matrix 'M' given a 'fileName' the format of the file should be:
+    /// on the first line M.numRows() M.numCols() separated by a space and
+    /// on each of the next M.numRows() lines, M.numCols() type T values.
 };
 
 template <typename T>

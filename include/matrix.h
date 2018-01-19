@@ -17,7 +17,6 @@ class Matrix
     std::vector<vector<T> > d_rows;
     std::vector<vector<T> > d_transpose;
     bool d_cachedTranspose;
-    static const constexpr long double EPS = 1e-16;
   public:
 /// Creators
     Matrix();
@@ -68,10 +67,6 @@ class Matrix
 
     void set(int row, int col, T value);
     /// Set the value at specified 'row' and specified 'col' to 'value'.
-
-    void setRaw(int row, int col, T value);
-    /// Set the value at specified 'row' and specified 'col' to 'value'.
-    /// This implementation does not take into account floating point error.
 
     Matrix<T> transpose();
     /// Return the transpose of 'this' Matrix. If it's cached then just returns it.
@@ -280,13 +275,6 @@ void Matrix<T>::set(int row, int col, T value)
 {
     ///if (fabs(value - (int) value) ) Turns out that this is not allowed for sufficiently large examples.
         ///value = (int) value;
-    d_rows[row][col] = value;
-    d_cachedTranspose = false;
-}
-
-template <typename T>
-void Matrix<T>::setRaw(int row, int col, T value)
-{
     d_rows[row][col] = value;
     d_cachedTranspose = false;
 }
