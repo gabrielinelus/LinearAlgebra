@@ -167,108 +167,6 @@ void unitTest4(int verbose = 0)
     }
 }
 
-void burnTest(bool verbose = false)
-{
-    ifstream fin("randomOrthonormal.in");
-    Matrix<long double> A(80, 80), Q, R, QL, RL;
-    Matrix<long double> AA(79, 79);
-    int left = 80;
-    for (int pk = 0; pk < 14; ++pk) {
-        for (int ln = 0; ln < 80; ++ln) {
-            for (int cl = 0; cl < min(6, left); ++cl) {
-                long double x;
-                fin >> x;
-                A.set(ln, cl + pk * 6, x);
-            }
-        }
-        left -= 6;
-    }
-
-    /*
-    for (int i = 0; i < 79; ++i)
-        for (int j = 0; j < 79; ++j)
-            AA.set(i, j, A.get(i, j));
-    fin.close();
-    */
-    if (verbose) {
-        /*
-        for (int i = 0; i < 10; ++i) {
-            for(int j = 0; j < 10; ++j) {
-                cout << A.get(i, j) << " ";
-            }
-            cout << "\n";
-        }*/
-
-        ofstream fout("matrix.out");
-        fout << "[" << endl;
-        for (int i = 0; i < A.numRows(); ++i) {
-            fout << "[ ";
-            for(int j = 0; j < A.numCols(); ++j) {
-                fout << A.get(i, j) << " ";
-                if (j != A.numCols() - 1)
-                    fout << ", ";
-                else
-                    fout << " ";
-            }
-            fout << "]";
-            if (i != A.numRows() - 1) {
-                fout << ",";
-            }
-            fout << endl;
-        }
-        fout << "]" << endl;
-    }
-    MatrixUtil<long double>::HouseholderQR(A, Q, R);
-///    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
-
-    MatrixUtil<long double>::QRDecomposition(A, Q, R);
-///    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
-
-    MatrixUtil<long double>::QRLosslessDecomposition(A, QL, RL);
-///    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-8));
-
-    if (verbose) {
-        for (int i = 0; i < 80; ++i) {
-            cout << R.get(i, i) << " ";
-            cout << RL.get(i, i) << endl;
-        }
-    }
-
-    ifstream fin2("matrixQ.in");
-
-    Matrix<long double> QMatlab(80,80);
-    left = 80;
-    for (int pk = 0; pk < 14; ++pk) {
-        for (int ln = 0; ln < 80; ++ln) {
-            for (int cl = 0; cl < min(6, left); ++cl) {
-                long double x;
-                fin2 >> x;
-                QMatlab.setRaw(ln, cl + pk * 6, x);
-            }
-        }
-        left -= 6;
-    }
-
-    ///cout << QMatlab << endl;
-
-    ///assert(MatrixUtil<long double>::compareEquals(QL, QMatlab, 1e-16));
-    ///assert(MatrixUtil<long double>::compareEquals(Q, QMatlab, 1e-8));
-
-/*
-    if (verbose) {
-        cout << endl << endl;
-        for (int i = 0; i < 79; ++i)
-            cout << RL.get(i, i) << " ";
-    }
-    cout << endl << endl;
-    cout << setprecision(16) << fixed;
-    for (int i = 0; i < 79; ++i) {
-        cout << RL.get(i, i) << " ";
-        cout << pow(2.0, -(i + 1)) << endl;
-    }
-    */
-}
-
 void clusteringTest()
 {
     srand(time(0));
@@ -334,36 +232,38 @@ void measureError()
     ///A.print(20);
 
     MatrixUtil<long double>::QRDecomposition(A, Q, R);
-    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-2));
+    assert(MatrixUtil<long double>::compareEquals(A, Q*R, 1e-8));
 
     MatrixUtil<long double>::QRLosslessDecomposition(A, QL, RL);
-    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-2));
+    assert(MatrixUtil<long double>::compareEquals(A, QL*RL, 1e-16));
+
 
     ofstream fcout("A.out");
 
+
     fcout << setprecision(20) << fixed;
+
     for (int i = 0; i < 80; ++i)
-        fcout << R.get(i, i) <<  endl << MatlabR.get(i, i) << endl << endl;
+        fcout << R.get(i, i)<<  endl;/// << MatlabR.get(i, i) << endl << endl;
 
     fcout << "\n-------------\n";
 
     for (int i = 0; i < 80; ++i)
-        fcout << RL.get(i, i) << endl << MatlabRL.get(i, i) << endl << endl;
-
+        fcout << RL.get(i, i) << endl;/// << MatlabRL.get(i, i) << endl << endl;
+    fcout << "\n";
 
 }
 
 int main()
 {
-    ///unitTest1(true);
-    ///unitTest2(true);
-    ///unitTest3(true);
-    ///unitTest4(true);
+    unitTest1(true);
+    unitTest2(true);
+    unitTest3(true);
+    unitTest4(true);
 
-    ///burnTest(true);
 
     clusteringTest();
-    ///measureError();
+    measureError();
 
 
     return 0;
