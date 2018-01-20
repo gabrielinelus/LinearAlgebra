@@ -15,8 +15,9 @@ class Matrix
 {
   private:
     std::vector<vector<T> > d_rows;
-    std::vector<vector<T> > d_transpose;
-    bool d_cachedTranspose;
+    int d_numRows;
+    int d_numCols;
+
   public:
 /// Creators
     Matrix();
@@ -135,16 +136,16 @@ class Matrix
 template <typename T>
 Matrix<T>::Matrix()
 : d_rows()
-, d_transpose()
-, d_cachedTranspose(false)
 {
+    d_numRows = 0;
+    d_numCols = 0;
 }
 
 template <typename T>
 Matrix<T>::Matrix(int rows, int columns)
 : d_rows(rows)
-, d_transpose()
-, d_cachedTranspose(false)
+, d_numRows(rows)
+, d_numCols(columns)
 {
     for (int i = 0; i < rows; ++i)
         d_rows[i].resize(columns);
@@ -153,17 +154,18 @@ Matrix<T>::Matrix(int rows, int columns)
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T>& other)
 : d_rows(other.d_rows)
-, d_transpose(other.d_transpose)
-, d_cachedTranspose(other.d_cachedTranspose)
+, d_numRows(other.d_numRows)
+, d_numCols(other.d_numCols)
 {
 }
 
 template <typename T>
 Matrix<T>::Matrix(const vector<vector<T> >& other)
 : d_rows(other)
-, d_transpose()
-, d_cachedTranspose(false)
 {
+    d_numRows = other.size();
+    if(other.size())
+        d_numCols = other[0].size();
 }
 
 template <typename T>
@@ -172,6 +174,8 @@ Matrix<T>& Matrix<T>::operator=(const Matrix& rhs)
     if (this == &rhs) return *this; /// handle self assignment
     d_rows.clear();
     d_rows.resize(rhs.d_rows.size());
+    d_numRows = rhs.numRows();
+    d_numCols = rhs.numCols();
     if (rhs.d_rows.size() == 0)
         return *this;   /// handle 0 rows
 
@@ -181,7 +185,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix& rhs)
     for (int i = 0; i < numRows(); ++i)
         for (int j = 0; j < numCols(); ++j)
             set(i, j, rhs.get(i,j));
-    d_cachedTranspose = false;
     return *this;
 }
 /*******************************************************/
@@ -214,7 +217,6 @@ void Matrix<T>::rowSwap(int i, int j)
         set(i, col, get(j, col));
         set(j, col, aux);
     }
-    d_cachedTranspose = false;
 }
 
 template <typename T>
@@ -225,7 +227,6 @@ void Matrix<T>::colSwap(int i, int j)
         set(row, i, get(row, j));
         set(row, j, aux);
     }
-    d_cachedTranspose = false;
 }
 
 template <typename T>
@@ -269,26 +270,17 @@ void Matrix<T>::setColumn(int index, const Matrix<T>& other)
 template <typename T>
 void Matrix<T>::set(int row, int col, T value)
 {
-    ///if (fabs(value - (int) value) ) Turns out that this is not allowed for sufficiently large examples.
-        ///value = (int) value;
     d_rows[row][col] = value;
-    d_cachedTranspose = false;
 }
 
 template <typename T>
 Matrix<T> Matrix<T>::transpose()
 {
-    if (d_cachedTranspose)
-        return Matrix<T>(d_transpose);
-    d_transpose.clear();
-    d_transpose.resize(numCols());
-    for (int j = 0; j < numCols(); ++j) {
-        d_transpose[j].resize(numRows());
-        for (int i = 0; i < numRows(); ++i)
-            d_transpose[j][i] = get(i, j);
-    }
-    d_cachedTranspose = true;
-    return Matrix<T>(d_transpose);
+    Matrix<T> transp(numCols(), numRows());
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            transp.set(j, i, get(i, j));
+    return transp;
 }
 
 template <typename T>
@@ -336,15 +328,13 @@ const T Matrix<T>::get(int row, int col) const
 template <typename T>
 const int Matrix<T>::numRows() const
 {
-    return d_rows.size();
+    return d_numRows;
 }
 
 template <typename T>
 const int Matrix<T>::numCols() const
 {
-    if (d_rows.empty())
-        return 0;
-    return d_rows[0].size();
+    return d_numCols;
 }
 
 template <typename T>
@@ -389,12 +379,12 @@ Matrix<T> Matrix<T>::operator()(int index) const
 template <typename T>
 bool Matrix<T>::operator == (const Matrix& other)
 {/// this does not take into account floating point precision!
-    if(d_rows.size() != other.d_rows.size())
+    if(numRows() != other.numRows() || numCols() != other.numCols())
         return false;
-    for (int i = 0; i < d_rows.size(); ++i) {
-        if (d_rows[i] != other.d_rows[i])
-            return false;
-    }
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            if(get(i, j) != other.get(i, j))
+                return false;
     return true;
 }
 
