@@ -252,6 +252,11 @@ void measureError()
         fcout << RL.get(i, i) << endl;/// << MatlabRL.get(i, i) << endl << endl;
     fcout << "\n";
 
+    /// Inverse testing.
+    Matrix<long double> RI;
+    MatrixUtil<long double>::GaussJordan(R, RI);
+    RI *= R * R;
+    assert(MatrixUtil<long double>::compareEquals(RI, R));
 }
 
 int main()

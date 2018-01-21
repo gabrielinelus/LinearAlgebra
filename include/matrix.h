@@ -2,11 +2,17 @@
 #define MATRIX_H
 
 #include <vector>
+#include <valarray>
 #include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <assert.h>
 #include <cmath>
+
+#define sliceRowI slice(i * numCols(), numCols(), 1)
+#define sliceRowJ slice(j * numCols(), numCols(), 1)
+#define sliceColI slice(i, numRows(), numCols())
+#define sliceColJ slice(j, numRows(), numCols())
 
 using namespace std;
 
@@ -14,7 +20,8 @@ template <typename T>
 class Matrix
 {
   private:
-    std::vector<vector<T> > d_rows;
+    typedef std::valarray<T> valArr;
+    valArr d_data;
     int d_numRows;
     int d_numCols;
 
@@ -29,16 +36,16 @@ class Matrix
     Matrix(const vector<vector<T> >& other);
     /// Constructs a matrix from a C++ vector of vectors.
 
-    Matrix(const Matrix& other);
+    Matrix(const Matrix& other) = default;
     /// Copy constructs a matrix with the same number of rows and columns
-    /// as the given one.
+    /// as the given one deep copies the entries.
 
-    Matrix& operator=(const Matrix& other);
+    Matrix& operator=(const Matrix& other) = default;
     /// Construct the current object with the specified 'other' matrix.
 
 /// Manipulators
 
-    void rowScale(int i, T scalar);
+    void rowScale(int i, const T& scalar);
     /// scale row i by T
 
     void colScale(int j, T scalar);
@@ -50,25 +57,25 @@ class Matrix
     void colSwap(int i, int j);
     /// swap two columns of a matrix
 
-    void addToRow(int i, const Matrix<T>& other);
+    void addToRow(int i, const Matrix& other);
     /// add to a row of a matrix a given row in matrix form
 
-    void addToCol(int j, const Matrix<T>& other);
+    void addToCol(int j, const Matrix& other);
     /// add to the column of a matrix a given column in matrix form
 
     void normalize();
     /// Divide by the Frobenius Norm.
 
-    void setColumn(int index, const Matrix<T>& other);
+    void setColumn(int index, const Matrix& other);
     /// Set the column 'index' to equal 'other'.
 
-    void setRow(int index, const Matrix<T>& other);
+    void setRow(int index, const Matrix& other);
     /// Set the row 'index' to equal other.
 
     void set(int row, int col, T value);
     /// Set the value at specified 'row' and specified 'col' to 'value'.
 
-    Matrix<T> transpose();
+    Matrix transpose();
     /// Return the transpose of 'this' Matrix. If it's cached then just returns it.
 
     T frobeniusNorm();
@@ -88,35 +95,35 @@ class Matrix
     const int numCols() const;
     /// Get the number of columns.
 
-    Matrix<T> operator[](int index) const;
+    Matrix operator[](int index) const;
     /// Get the 'index'th row of the Matrix in a Matrix row form.
 
-    Matrix<T> operator()(int upRow, int downRow, int leftCol, int rightCol);
+    Matrix operator()(int upRow, int downRow, int leftCol, int rightCol);
     /// Get the submatrix defined by rows [upRow, downRow] and columns [leftCol, rightCol].
 
-    Matrix<T> operator()(int index) const;
+    Matrix operator()(int index) const;
     /// Get the 'index'th column of the Matrix in a Matrix column form.
 
 /// Free operators
-    bool operator == (const Matrix<T>& other);
+    bool operator == (const Matrix& other);
     /// Returns if the two matrices are equal
 
-    bool operator != (const Matrix<T>& other);
+    bool operator != (const Matrix& other);
     /// Returns if the two matrices are different
 
-    Matrix<T>& operator *= (const Matrix<T>& rhs);
+    Matrix& operator *= (const Matrix& rhs);
     /// Multiply 'this' by 'rhs' matrix.
 
-    Matrix<T>& operator *= (const T& rhs);
+    Matrix& operator *= (const T& rhs);
     /// Multiply 'this' by 'rhs' scalar.
 
-    Matrix<T>& operator += (const Matrix<T>& rhs);
+    Matrix& operator += (const Matrix& rhs);
     /// Add to 'this' matrix the 'rhs' matrix
 
-    Matrix<T>& operator -= (const Matrix<T>& rhs);
+    Matrix& operator -= (const Matrix& rhs);
     /// Subtract from 'this' matrix the 'rhs' matrix
 
-    Matrix<T>& operator /= (const T& rhs);
+    Matrix& operator /= (const T& rhs);
     /// Divide 'this' matrix by the 'rhs' scalar
 
 /// Friend Operators
@@ -135,7 +142,7 @@ class Matrix
 
 template <typename T>
 Matrix<T>::Matrix()
-: d_rows()
+: d_data()
 {
     d_numRows = 0;
     d_numCols = 0;
@@ -143,50 +150,25 @@ Matrix<T>::Matrix()
 
 template <typename T>
 Matrix<T>::Matrix(int rows, int columns)
-: d_rows(rows)
+: d_data(rows*columns)
 , d_numRows(rows)
 , d_numCols(columns)
-{
-    for (int i = 0; i < rows; ++i)
-        d_rows[i].resize(columns);
-}
-
-template <typename T>
-Matrix<T>::Matrix(const Matrix<T>& other)
-: d_rows(other.d_rows)
-, d_numRows(other.d_numRows)
-, d_numCols(other.d_numCols)
 {
 }
 
 template <typename T>
 Matrix<T>::Matrix(const vector<vector<T> >& other)
-: d_rows(other)
 {
     d_numRows = other.size();
     if(other.size())
         d_numCols = other[0].size();
-}
-
-template <typename T>
-Matrix<T>& Matrix<T>::operator=(const Matrix& rhs)
-{
-    if (this == &rhs) return *this; /// handle self assignment
-    d_rows.clear();
-    d_rows.resize(rhs.d_rows.size());
-    d_numRows = rhs.numRows();
-    d_numCols = rhs.numCols();
-    if (rhs.d_rows.size() == 0)
-        return *this;   /// handle 0 rows
-
-    for (int i = 0; i < (int)d_rows.size(); ++i)
-        d_rows[i].resize(rhs.d_rows[0].size());
-
+    int pos = 0;
+    d_data.resize(numRows() * numCols());
     for (int i = 0; i < numRows(); ++i)
         for (int j = 0; j < numCols(); ++j)
-            set(i, j, rhs.get(i,j));
-    return *this;
+            d_data[pos++] = other[i][j];
 }
+
 /*******************************************************/
 ///                  End of Creators                  ///
 /*******************************************************/
@@ -196,37 +178,31 @@ Matrix<T>& Matrix<T>::operator=(const Matrix& rhs)
 /*******************************************************/
 
 template <typename T>
-void Matrix<T>::rowScale(int i, T scalar)
+void Matrix<T>::rowScale(int i, const T& scalar)
 {
-    for (int col = 0; col < numCols(); ++col)
-        set(i, col, get(i, col) * scalar);
+    d_data[sliceRowI] *= valArr(scalar, numCols());
 }
 
 template <typename T>
 void Matrix<T>::colScale(int j, T scalar)
 {
-    for (int row = 0; row < numRows(); ++row)
-        set(row, j, get(row, j) * scalar);
+    d_data[sliceColJ] *= valArr(scalar, numRows());
 }
 
 template <typename T>
 void Matrix<T>::rowSwap(int i, int j)
 {
-    for (int col = 0; col < numCols(); ++col) {
-        T aux = get(i, col);
-        set(i, col, get(j, col));
-        set(j, col, aux);
-    }
+    valArr aux(d_data[sliceRowI]);
+    d_data[sliceRowI] = valArr(d_data[sliceRowJ]);
+    d_data[sliceRowJ] = aux;
 }
 
 template <typename T>
 void Matrix<T>::colSwap(int i, int j)
 {
-    for (int row = 0; row < numRows(); ++row) {
-        T aux = get(row, i);
-        set(row, i, get(row, j));
-        set(row, j, aux);
-    }
+    valArr aux(d_data[sliceColI]);
+    d_data[sliceColI] = valArr(d_data[sliceColJ]);
+    d_data[sliceColJ] = aux;
 }
 
 template <typename T>
@@ -248,29 +224,25 @@ void Matrix<T>::normalize()
 {
     T norm = frobeniusNorm();
     assert(norm > 0);
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            set(i, j, get(i, j) / norm);
+    d_data /= norm;
 }
 
 template <typename T>
-void Matrix<T>::setRow(int index, const Matrix<T>& other)
+void Matrix<T>::setRow(int i, const Matrix<T>& other)
 {
-    for (int i = 0; i < other.numCols(); ++i)
-        set(index, i, other.get(0, i));
+    d_data[sliceRowI] = other.d_data;
 }
 
 template <typename T>
-void Matrix<T>::setColumn(int index, const Matrix<T>& other)
+void Matrix<T>::setColumn(int j, const Matrix<T>& other)
 {
-    for (int i = 0; i < other.numRows(); ++i)
-        set(i, index, other.get(i, 0));
+    d_data[sliceColJ] = other.d_data;
 }
 
 template <typename T>
 void Matrix<T>::set(int row, int col, T value)
 {
-    d_rows[row][col] = value;
+    d_data[row * numCols() + col] = value;
 }
 
 template <typename T>
@@ -322,7 +294,7 @@ const void Matrix<T>::print(int indent) const
 template <typename T>
 const T Matrix<T>::get(int row, int col) const
 {
-    return d_rows[row][col];
+    return d_data[row * numCols() + col];
 }
 
 template <typename T>
@@ -338,11 +310,10 @@ const int Matrix<T>::numCols() const
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator[](int index) const
+Matrix<T> Matrix<T>::operator[](int i) const
 {
     Matrix<T> result(1, numCols());
-    for (int i = 0; i < numCols(); ++i)
-        result.set(0, i, get(index, i));
+    result.d_data = d_data[sliceRowI];
     return result;
 }
 
@@ -353,18 +324,19 @@ Matrix<T> Matrix<T>::operator()(int upRow,
                                 int rightCol)
 {
     Matrix<T> result(downRow - upRow + 1, rightCol - leftCol + 1);
-    for (int i = 0; i < result.numRows(); ++i)
-        for(int j = 0; j < result.numCols(); ++j)
-            result.set(i, j, get(upRow + i, leftCol + j));
+    result.d_data = d_data[gslice(
+                                    upRow * numCols() + leftCol,
+                                    {downRow - upRow + 1, rightCol - leftCol + 1},
+                                    {numCols(), 1}
+                                 )];
     return result;
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator()(int index) const
+Matrix<T> Matrix<T>::operator()(int j) const
 {
     Matrix<T> result(numRows(), 1);
-    for (int i = 0; i < numRows(); ++i)
-        result.set(i, 0, get(i, index));
+    result.d_data = d_data[sliceColJ];
     return result;
 }
 
@@ -381,11 +353,9 @@ bool Matrix<T>::operator == (const Matrix& other)
 {/// this does not take into account floating point precision!
     if(numRows() != other.numRows() || numCols() != other.numCols())
         return false;
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            if(get(i, j) != other.get(i, j))
-                return false;
-    return true;
+    ///----------------------------///
+    return d_data == other.d_data; /// Compiler optimised
+    ///----------------------------///
 }
 
 template <typename T>
@@ -413,11 +383,16 @@ Matrix<T>& Matrix<T>::operator *= (const Matrix<T>& rhs) {
 
     assert(numCols() == rhs.numRows() && "matrix multiplication impossible!");
 
+
     Matrix<T> rez(numRows(), rhs.numCols());
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < rhs.numCols(); ++j)
-            for (int k = 0; k < numCols(); ++k)
-                rez.set(i, j, rez.get(i, j) + get(i, k) * rhs.get(k, j));
+
+    ///-------------------------------------------------------------------------------///
+    for (int i = 0; i < numRows(); ++i)                                               ///
+        for (int j = 0; j < rhs.numCols(); ++j)                                       /// Compiler optimised
+            rez.set(i, j, (    d_data[slice(i * numCols(), numCols(), 1)] *           ///
+                           rhs.d_data[slice(j, rhs.numRows(), rhs.numCols())]).sum());///
+    ///-------------------------------------------------------------------------------///
+
 
     (*this) = rez;
     return *this;
@@ -425,9 +400,11 @@ Matrix<T>& Matrix<T>::operator *= (const Matrix<T>& rhs) {
 
 template <typename T>
 Matrix<T>& Matrix<T>::operator *= (const T& rhs) {
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            set(i,j, get(i,j) * rhs);
+
+    ///-----------///
+    d_data *= rhs;/// Compiler optimised.
+    ///-----------///
+
     return *this;
 }
 
@@ -437,9 +414,9 @@ Matrix<T>& Matrix<T>::operator += (const Matrix<T>& rhs) {
            numCols() == rhs.numCols() &&
            "matrix addition impossible!");
 
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            set(i, j, get(i, j) + rhs.get(i, j));
+    ///------------------///
+    d_data += rhs.d_data;/// Compiler optimised.
+    ///------------------///
 
     return *this;
 }
@@ -449,18 +426,21 @@ Matrix<T>& Matrix<T>::operator -= (const Matrix<T>& rhs) {
     assert(numRows() == rhs.numRows() &&
            numCols() == rhs.numCols() &&
            "matrix addition impossible!");
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            set(i, j, get(i, j) - rhs.get(i, j));
+
+    ///------------------///
+    d_data -= rhs.d_data;/// Compiler optimised.
+    ///------------------///
 
     return *this;
 }
 
 template <typename T>
 Matrix<T>& Matrix<T>::operator /= (const T& rhs){
-    for (int i = 0; i < numRows(); ++i)
-        for (int j = 0; j < numCols(); ++j)
-            set(i,j, get(i,j) / rhs);
+
+    ///-----------///
+    d_data /= rhs;/// Compiler optimised.
+    ///-----------///
+
     return *this;
 }
 
