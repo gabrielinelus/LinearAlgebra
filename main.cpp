@@ -259,16 +259,43 @@ void measureError()
     assert(MatrixUtil<long double>::compareEquals(RI, R));
 }
 
+void unitTest5(int verbose = 0)
+{
+    Matrix<long double> init({
+                              { 1,2,2},
+                              {-1,1,2},
+                              {-1,0,1},
+                              { 1,1,2}
+                            });
+    Matrix<long double> Q, QT, R, RT, A;
+    MatrixUtil<long double>::QRDecomposition(init, Q, R);
+    if (verbose) {
+        cout << Q << endl;
+        cout << R << endl;
+    }
+    A = Q * R;
+    assert(MatrixUtil<long double>::compareEquals(A, init));
+
+    MatrixUtil<long double>::HouseholderQR(init, QT, RT);
+    if (verbose) {
+        cout << QT << endl;
+        cout << RT << endl;
+    }
+    A = QT*RT;
+    assert(MatrixUtil<long double>::compareEquals(A, init));
+}
+
 int main()
 {
-    unitTest1(true);
-    unitTest2(true);
-    unitTest3(true);
-    unitTest4(true);
+    ///unitTest1(true);
+    ///unitTest2(true);
+    ///unitTest3(true);
+    ///unitTest4(true);
+    unitTest5(true);
 
 
-    clusteringTest();
-    measureError();
+    ///clusteringTest();
+    ///measureError();
 
 
     return 0;
