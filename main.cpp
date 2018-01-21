@@ -220,7 +220,7 @@ void clusteringTest()
     cout << centroids;
     for (int i = 0; i < indices.size(); ++i)
         cout << indices[i] << " ";
-
+    cout << endl;
 }
 
 void measureError()
@@ -301,7 +301,7 @@ void measurePrecisionATAI()
     cout << "My      answer: " << x.get(14, 0) << endl;
     MatrixUtil<long double>::Reader(xmatlab, string("precisionTest1.in"));
     cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
-    cout << "Correct answer: 1";
+    cout << "Correct answer: 1" << endl;
 }
 
 void measurePrecisionMGS()
@@ -320,7 +320,7 @@ void measurePrecisionMGS()
     cout << setprecision(30) << fixed;
     cout << "My      answer: " << x.get(14, 0) << endl;
     cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
-    cout << "Correct answer: 1";
+    cout << "Correct answer: 1" << endl;
 
 }
 
@@ -337,7 +337,7 @@ void measurePrecisionInverse()
     cout << setprecision(30) << fixed;
     cout << "My      answer: Impossible to invert - not square"<< endl;
     cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
-    cout << "Correct answer: 1";
+    cout << "Correct answer: 1" << endl;
 }
 
 void measurePrecisionMGSE()
@@ -366,24 +366,24 @@ void measurePrecisionMGSE()
     cout << setprecision(30) << fixed;
     cout << "My      answer: " << x.get(14, 0) << endl;
     cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
-    cout << "Correct answer: 1";
+    cout << "Correct answer: 1" << endl;
 }
 
 int main()
 {
-    ///unitTest1(true);
-    ///unitTest2(true);
-    ///unitTest3(true);
-    ///unitTest4(true);
+    unitTest1(true);
+    unitTest2(true);
+    unitTest3(true);
+    unitTest4(true);
     ///unitTest5(true);
 
 
-    ///clusteringTest();
-    ///measureError();
-    ///measurePrecisionATAI();
-    ///measurePrecisionMGS();
+    clusteringTest();
+    measureError();
+    measurePrecisionATAI();
+    measurePrecisionMGS();
     measurePrecisionMGSE();
-    ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
+    measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
 
 
     return 0;
