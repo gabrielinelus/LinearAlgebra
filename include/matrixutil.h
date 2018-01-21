@@ -123,7 +123,6 @@ void MatrixUtil<T>::GaussJordan(Matrix<T> A, Matrix<T> &AI)
         }
     }
     /// We are now in an upper unitriangular shape
-
     for (int i = (int)A.numRows() - 1; i >= 0; --i)
         for (int j = i - 1; j >= 0; --j) {
             AI.addToRow(j, AI[i] * (-A.get(j, i)));

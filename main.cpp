@@ -285,17 +285,105 @@ void unitTest5(int verbose = 0)
     assert(MatrixUtil<long double>::compareEquals(A, init));
 }
 
+void measurePrecisionATAI()
+{
+    Matrix<long double> A, b, Q, R, QL, RL, ATA, ATAI, xmatlab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    ATA = A.transpose() * A;
+    MatrixUtil<long double>::GaussJordan(ATA, ATAI);
+    ///MatrixUtil<long double>::Reader(ATAI, string("precisionATAI.in"));
+
+    Matrix<long double> x = ATAI * (A.transpose() * b);
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    MatrixUtil<long double>::Reader(xmatlab, string("precisionTest1.in"));
+    cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
+    cout << "Correct answer: 1";
+}
+
+void measurePrecisionMGS()
+{
+    Matrix<long double> A, b, Q, R, RI, xmatlab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    MatrixUtil<long double>::QRLosslessDecomposition(A, Q, R);
+    MatrixUtil<long double>::GaussJordan(R, RI);
+
+    Matrix<long double> x = RI * Q.transpose() * b;
+    MatrixUtil<long double>::Reader(xmatlab, string("precisionTest2.in"));
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
+    cout << "Correct answer: 1";
+
+}
+
+void measurePrecisionInverse()
+{
+    Matrix<long double> A, b, AI, xmatlab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+
+    MatrixUtil<long double>::Reader(xmatlab, string("precisionTest3.in"));
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: Impossible to invert - not square"<< endl;
+    cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
+    cout << "Correct answer: 1";
+}
+
+void measurePrecisionMGSE()
+{
+    Matrix<long double> A, b, QE, REI, RE, xmatlab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    Matrix<long double> AE(A.numRows(), A.numCols() + 1);
+
+    for (int i = 0; i < A.numCols(); ++i)
+        AE.setColumn(i, A(i));
+    AE.setColumn(A.numCols(), b);
+
+    MatrixUtil<long double>::QRLosslessDecomposition(AE, QE, RE);
+    QE = RE(0, A.numCols() - 1, A.numCols(), A.numCols());
+    RE = RE(0, A.numCols() - 1, 0, A.numCols() - 1);
+
+    MatrixUtil<long double>::GaussJordan(RE, REI);
+
+    Matrix<long double> x = REI * QE;
+
+    MatrixUtil<long double>::Reader(xmatlab, string("precisionTest4.in"));
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
+    cout << "Correct answer: 1";
+}
+
 int main()
 {
     ///unitTest1(true);
     ///unitTest2(true);
     ///unitTest3(true);
     ///unitTest4(true);
-    unitTest5(true);
+    ///unitTest5(true);
 
 
     ///clusteringTest();
     ///measureError();
+    ///measurePrecisionATAI();
+    ///measurePrecisionMGS();
+    measurePrecisionMGSE();
+    ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
 
 
     return 0;
