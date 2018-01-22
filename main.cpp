@@ -371,19 +371,19 @@ void measurePrecisionMGSE()
 
 int main()
 {
-    unitTest1(true);
-    unitTest2(true);
-    unitTest3(true);
-    unitTest4(true);
+    ///unitTest1(true);
+    ///unitTest2(true);
+    ///unitTest3(true);
+    ///unitTest4(true);
     ///unitTest5(true);
 
 
-    clusteringTest();
-    measureError();
-    measurePrecisionATAI();
-    measurePrecisionMGS();
+    ///clusteringTest();
+    ///measureError();
+    ///measurePrecisionATAI();
+    ///measurePrecisionMGS();
     measurePrecisionMGSE();
-    measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
+    ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
 
 
     return 0;
