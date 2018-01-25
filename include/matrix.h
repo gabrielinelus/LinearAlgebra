@@ -66,6 +66,10 @@ class Matrix
     void normalize();
     /// Divide by the Frobenius Norm.
 
+    void setSubmatrix(int upRow, int downRow, int leftCol, int rightCol, const Matrix& other);
+    /// Set the submatrix given by the intersection of [upRow, downRow] rows
+    /// and [leftCol, rightCol] columns to the specified matrix.
+
     void setColumn(int index, const Matrix& other);
     /// Set the column 'index' to equal 'other'.
 
@@ -228,14 +232,28 @@ void Matrix<T>::normalize()
 }
 
 template <typename T>
+void Matrix<T>::setSubmatrix(int upRow, int downRow, int leftCol, int rightCol, const Matrix<T>& other)
+{
+    assert(other.numRows() == downRow - upRow + 1 &&
+           other.numCols() == rightCol - leftCol + 1);
+    d_data[gslice( upRow * numCols() + leftCol,
+                  {downRow - upRow + 1, rightCol - leftCol + 1},
+                  {numCols(), 1}
+                 )] = other.d_data;
+
+}
+
+template <typename T>
 void Matrix<T>::setRow(int i, const Matrix<T>& other)
 {
+    assert(numCols() == other.numCols() && other.numRows() == 1);
     d_data[sliceRowI] = other.d_data;
 }
 
 template <typename T>
 void Matrix<T>::setColumn(int j, const Matrix<T>& other)
 {
+    assert(numRows() == other.numRows() && other.numCols() == 1);
     d_data[sliceColJ] = other.d_data;
 }
 
