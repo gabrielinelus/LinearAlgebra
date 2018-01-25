@@ -167,6 +167,50 @@ void unitTest4(int verbose = 0)
     }
 }
 
+void unitTest5(int verbose = 0)
+{
+    Matrix<long double> init({
+                              { 1,2,2},
+                              {-1,1,2},
+                              {-1,0,1},
+                              { 1,1,2}
+                            });
+    Matrix<long double> Q, Qb, R, Rb, A;
+
+    MatrixUtil<long double>::QRDecomposition(init, Q, R);
+    if (verbose) {
+        cout << Q << endl;
+        cout << R << endl;
+    }
+    A = Q * R;
+    assert(MatrixUtil<long double>::compareEquals(A, init));
+
+    MatrixUtil<long double>::HouseholderQR(init, Q, R);
+
+    A = Q * R;
+    assert(MatrixUtil<long double>::compareEquals(A, init));
+
+}
+
+void unitTest6(int verbose)
+{
+    Matrix<long double> M({
+                                {1,1,1,1},
+                                {1,1,1,1},
+                                {1,1,1,1},
+                                {1,1,1,1},
+                         });
+
+    Matrix<long double> N({
+                             {3,3},
+                             {3,3},
+                         });
+    M.setSubmatrix(1, 2, 1, 2, N);
+    if(verbose) {
+        cout << M;
+    }
+}
+
 void clusteringTest()
 {
     srand(time(0));
@@ -259,31 +303,7 @@ void measureError()
     assert(MatrixUtil<long double>::compareEquals(RI, R));
 }
 
-void unitTest5(int verbose = 0)
-{
-    Matrix<long double> init({
-                              { 1,2,2},
-                              {-1,1,2},
-                              {-1,0,1},
-                              { 1,1,2}
-                            });
-    Matrix<long double> Q, QT, R, RT, A;
-    MatrixUtil<long double>::QRDecomposition(init, Q, R);
-    if (verbose) {
-        cout << Q << endl;
-        cout << R << endl;
-    }
-    A = Q * R;
-    assert(MatrixUtil<long double>::compareEquals(A, init));
 
-    MatrixUtil<long double>::HouseholderQR(init, QT, RT);
-    if (verbose) {
-        cout << QT << endl;
-        cout << RT << endl;
-    }
-    A = QT*RT;
-    assert(MatrixUtil<long double>::compareEquals(A, init));
-}
 
 void measurePrecisionATAI()
 {
@@ -369,21 +389,69 @@ void measurePrecisionMGSE()
     cout << "Correct answer: 1" << endl;
 }
 
+void measurePrecisionHouseholderInverse()
+{
+    Matrix<long double> A, b, Q, R, RI;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    MatrixUtil<long double>::HouseholderQR(A, Q, R);
+    MatrixUtil<long double>::GaussJordan(R, RI);
+
+    Matrix<long double> x = RI * Q.transpose() * b;
+
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    cout << "Correct answer: 1" << endl;
+}
+
+void measurePrecisionHouseholderExtended()
+{
+    Matrix<long double> A, b, Qb, R, RI, Ab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    Matrix<long double> AE(A.numRows(), A.numCols() + 1);
+
+    for (int i = 0; i < A.numCols(); ++i)
+        AE.setColumn(i, A(i));
+    AE.setColumn(A.numCols(), b);
+
+    MatrixUtil<long double>::HouseholderQbR(AE, Qb, R);
+
+    MatrixUtil<long double>::GaussJordan(R, RI);
+
+    Matrix<long double> x = RI * Qb;
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    cout << "Correct answer: 1" << endl;
+}
+
+
+
+
 int main()
 {
-    ///unitTest1(true);
-    ///unitTest2(true);
-    ///unitTest3(true);
-    ///unitTest4(true);
-    ///unitTest5(true);
+    unitTest1(true);
+    unitTest2(true);
+    unitTest3(true);
+    unitTest4(true);
+    unitTest5(true);
+    unitTest6(true);
 
 
-    ///clusteringTest();
-    ///measureError();
-    ///measurePrecisionATAI();
-    ///measurePrecisionMGS();
+    clusteringTest();
+    measureError();
+    measurePrecisionATAI();
+    measurePrecisionMGS();
     measurePrecisionMGSE();
-    ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
+    measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
+    measurePrecisionHouseholderInverse();
+    measurePrecisionHouseholderExtended();
 
 
     return 0;

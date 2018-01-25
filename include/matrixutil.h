@@ -8,7 +8,7 @@ template <typename T>
 class MatrixUtil
 {
   private:
-    static const constexpr long double EPS = 1e-16;
+    static constexpr long double EPS = 1e-16;
   public:
     static bool compareEquals(Matrix<T> A, Matrix<T> B, T epsilon = EPS);
     /// Compare equality between two matrices. Returns true if the component
@@ -36,7 +36,8 @@ class MatrixUtil
     /// system A*x = b using a stable QR decomposition.
 
     static void HouseholderQR(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R);
-    /// Decompose the matrix A into a orthonormal matrix Q and R = Q^T * A.
+
+    static void HouseholderQbR(Matrix<T> Ab, Matrix<T> &Qb, Matrix<T> &R);
 
     static void Reader(Matrix<T> &M, string fileName);
     /// Read a matrix 'M' given a 'fileName' the format of the file should be:
@@ -149,27 +150,55 @@ void MatrixUtil<T>::HouseholderQR(Matrix<T> A, Matrix<T> &Q, Matrix<T> &R)
     int n = A.numCols() - 1;
     int m = A.numRows() - 1;
 
-    Matrix<T> savedA = A;
+    Matrix<T> savedA(A);
 
-    auto sign = [](int x) {
+    auto sign = [](T x) -> T{
         if (x >= 0) return 1;
         return -1;
     };
 
-    for (int k = 0; k < n; ++k) {
+
+    for (int k = 0; k <= n; ++k) {
         Matrix<T> x = A(k, m, k, k);
-        Matrix<T> vk = x;
-        vk.set(1,0, vk.get(1,0) + sign(x.get(1, 0)) * x.frobeniusNorm());
+
+        Matrix<T> e1(m - k + 1, 1);
+        e1.set(0, 0, 1);
+
+        Matrix<T> vk = e1 * sign(x.get(0, 0))*x.frobeniusNorm() + x;
         vk.normalize();
-        Matrix<T> aux = A(k, m, k, n);
-        aux = vk*(vk.transpose()*aux) * (-2.0L);
-        for (int i = 0; i < aux.numRows(); ++i)
-            for (int j = 0; j < aux.numCols(); ++j)
-                A.set(k + i, k + j, A.get(k + i, k + j) + aux.get(i, j));
+        A.setSubmatrix(k, m, k, n, A(k, m, k, n) - vk*(vk.transpose()*A(k, m, k, n)) * 2.0L);
     }
-    R = A;
-    GaussJordan(R, Q);
-    Q = savedA * Q;
+
+    R = A(0, n, 0, n);
+    Matrix<T> RI;
+    GaussJordan(R, RI);
+    Q = savedA * RI;
+}
+
+template <typename T>
+void MatrixUtil<T>::HouseholderQbR(Matrix<T> Ab, Matrix<T> &Qb, Matrix<T> &R)
+{
+    int n = Ab.numCols() - 1;
+    int m = Ab.numRows() - 1;
+
+
+    auto sign = [](T x) -> T{
+        if (x >= 0) return 1;
+        return -1;
+    };
+
+    for (int k = 0; k <= n; ++k) {
+        Matrix<T> x = Ab(k, m, k, k);
+
+        Matrix<T> e1(m - k + 1, 1);
+        e1.set(0, 0, 1);
+
+        Matrix<T> vk = e1 * sign(x.get(0, 0))*x.frobeniusNorm() + x;
+        vk.normalize();
+        Ab.setSubmatrix(k, m, k, n, Ab(k, m, k, n) - vk*(vk.transpose()*Ab(k, m, k, n)) * 2.0L);
+    }
+    R = Ab(0, n - 1, 0, n - 1);
+    Qb = Ab(0, n - 1, n, n);
 }
 
 template <typename T>
