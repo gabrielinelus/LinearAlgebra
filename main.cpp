@@ -4,6 +4,7 @@
 #include <matrix.h>
 #include <matrixutil.h>
 #include <clusteringutility.h>
+#include <distributions.h>
 
 #include <time.h>
 #include <random>
@@ -431,28 +432,36 @@ void measurePrecisionHouseholderExtended()
     cout << "Correct answer: 1" << endl;
 }
 
+void testGaussian()
+{
+    long double mean = 0, standardDeviation = 1;
 
+    Gaussian<long double> gaussian(mean, standardDeviation);
+    for (int i = 1; i <= 100; ++i)
+        cout << gaussian.sample() << endl;
+}
 
 
 int main()
 {
-    unitTest1(true);
-    unitTest2(true);
-    unitTest3(true);
-    unitTest4(true);
-    unitTest5(true);
-    unitTest6(true);
+    ///unitTest1(true);
+    ///unitTest2(true);
+    ///unitTest3(true);
+    ///unitTest4(true);
+    ///unitTest5(true);
+    ///unitTest6(true);
 
 
-    clusteringTest();
-    measureError();
-    measurePrecisionATAI();
-    measurePrecisionMGS();
-    measurePrecisionMGSE();
-    measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
-    measurePrecisionHouseholderInverse();
-    measurePrecisionHouseholderExtended();
+    ///clusteringTest();
+    ///measureError();
+    ///measurePrecisionATAI();
+    ///measurePrecisionMGS();
+    ///measurePrecisionMGSE();
+    ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
+    ///measurePrecisionHouseholderInverse();
+    ///measurePrecisionHouseholderExtended();
 
+    testGaussian();
 
     return 0;
 }
