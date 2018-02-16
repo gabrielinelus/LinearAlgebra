@@ -5,6 +5,7 @@
 #include <matrixutil.h>
 #include <clusteringutility.h>
 #include <distributions.h>
+#include <polynomial.h>
 
 #include <time.h>
 #include <random>
@@ -263,7 +264,7 @@ void clusteringTest()
 
     cout << ClusteringUtility<long double>::KMeans(X, 4, indices, centroids, false) << "\n";
     cout << centroids;
-    for (int i = 0; i < indices.size(); ++i)
+    for (int i = 0; i < (int)indices.size(); ++i)
         cout << indices[i] << " ";
     cout << endl;
 }
@@ -441,6 +442,33 @@ void testGaussian()
         cout << gaussian.sample() << endl;
 }
 
+void testBasisExpansion()
+{
+    Matrix<long double> row(BasisExpansion<long double>::expand(5.0L, 4));
+    cout << row;
+}
+
+void testPolynomial()
+{
+    Gaussian<long double> gauss(0, 100);
+    vector<long double> coeff;
+    coeff.push_back(-2);
+    coeff.push_back(3);
+    coeff.push_back(-5);
+    coeff.push_back(7);
+    /// 2 + 3x + 5x^2 + 7x^3
+
+    Polynomial<long double> p1(coeff), p2(coeff, &gauss);
+    for (int i = 0; i <= 20; i += 4)
+        cerr << "(" << i << ", " << p1.evaluate(i) << ") ";
+    cerr << endl;
+
+    for (int i = 0; i <= 20; i += 4)
+        cerr << "(" << i << ", " << p2.evaluate(i) << ") ";
+    cerr << endl;
+
+
+}
 
 int main()
 {
@@ -461,7 +489,9 @@ int main()
     ///measurePrecisionHouseholderInverse();
     ///measurePrecisionHouseholderExtended();
 
-    testGaussian();
+    ///testGaussian();
+    ///testBasisExpansion();
+    ///testPolynomial();
 
     return 0;
 }
