@@ -466,8 +466,113 @@ void testPolynomial()
     for (int i = 0; i <= 20; i += 4)
         cerr << "(" << i << ", " << p2.evaluate(i) << ") ";
     cerr << endl;
+}
 
+void testFitExactPolynomial()
+{
+    vector<long double> coeff;
+    coeff.push_back(-2);
+    coeff.push_back(3);
+    coeff.push_back(-5);
+    coeff.push_back(7);
+    coeff.push_back(-11);
 
+    /// -2 + 3x - 5x^2 + 7x^3 - 11x^4
+
+    vector<pair<long double, long double> > points;
+    Polynomial<long double> p1(coeff);
+    for (int i = -20; i <= 20; i += 3) {
+        points.push_back({i, p1.evaluate(i)});
+    }
+
+    for (int degree = 1; degree <= 6; ++degree) {
+        /// we choose the degree of line we try to fit
+        /// for degree we get degree + 1 features
+        Matrix<long double> A(points.size(), degree + 1), x(degree + 1, 1), b(points.size(), 1);
+        for (int i = 0; i < points.size(); ++i) {
+            A.setRow(i, Matrix<long double>(BasisExpansion<long double>::expand(points[i].first, degree)));
+            b.set(i, 0, points[i].second);
+        }
+        ///A.print(15);
+        ///cerr << "\n---------------------------\n";
+        MatrixUtil<long double>::LeastSquaresQR(A, b, x, true);
+        Matrix<long double> y = A*x - b;
+        cout << x << "\n Error: ";
+        cout << setprecision(10) << fixed;
+        cout << (y.transpose() * y).get(0, 0) << endl << endl;
+    }
+}
+
+void testFitNoisyPolynomial()
+{
+    vector<long double> coeff;
+    Gaussian<long double> gauss(0, 30);
+    coeff.push_back(-2);
+    coeff.push_back(3);
+    coeff.push_back(-5);
+    coeff.push_back(7);
+    coeff.push_back(-11);
+
+    /// -2 + 3x - 5x^2 + 7x^3 - 11x^4
+
+    vector<pair<long double, long double> > points;
+    Polynomial<long double> p1(coeff, &gauss);
+    for (int i = -50; i <= 50; ++i) {
+        points.push_back({i, p1.evaluate(i)});
+    }
+
+    for (int degree = 1; degree <= 6; ++degree) {
+        /// we choose the degree of line we try to fit
+        /// for degree we get degree + 1 features
+        Matrix<long double> A(points.size(), degree + 1), x(degree + 1, 0), b(points.size(), 1);
+        for (int i = 0; i < points.size(); ++i) {
+            A.setRow(i, Matrix<long double>(BasisExpansion<long double>::expand(points[i].first, degree)));
+            b.set(i, 0, points[i].second);
+        }
+        ///A.print(15);
+        ///cerr << "\n---------------------------\n";
+        MatrixUtil<long double>::LeastSquaresQR(A, b, x, false);
+        Matrix<long double> y = A*x - b;
+        cout << x << "\n Error: ";
+        cout << setprecision(10) << fixed;
+        cout << (y.transpose() * y).get(0, 0) << endl << endl;
+    }
+}
+
+void testFitNoisyPolynomial2()
+{
+    vector<long double> coeff;
+    Gaussian<long double> gauss(0, 1);
+    coeff.push_back(-2);
+    coeff.push_back(2);
+    coeff.push_back(-2);
+    coeff.push_back(2);
+    coeff.push_back(-2);
+
+    /// -2 + 2x - 2x^2 + 2x^3 - 2x^4
+
+    vector<pair<long double, long double> > points;
+    Polynomial<long double> p1(coeff, &gauss);
+    for (int i = -10; i <= 10; i += 1) {
+        points.push_back({i, p1.evaluate(i)});
+    }
+
+    for (int degree = 1; degree <= 6; ++degree) {
+        /// we choose the degree of line we try to fit
+        /// for degree we get degree + 1 features
+        Matrix<long double> A(points.size(), degree + 1), x(degree + 1, 0), b(points.size(), 1);
+        for (int i = 0; i < points.size(); ++i) {
+            A.setRow(i, Matrix<long double>(BasisExpansion<long double>::expand(points[i].first, degree)));
+            b.set(i, 0, points[i].second);
+        }
+        ///A.print(15);
+        ///cerr << "\n---------------------------\n";
+        MatrixUtil<long double>::LeastSquaresQR(A, b, x, true);
+        Matrix<long double> y = A*x - b;
+        cout << x << "\n Error: ";
+        cout << setprecision(10) << fixed;
+        cout << (y.transpose() * y).get(0, 0) << endl << endl;
+    }
 }
 
 int main()
@@ -492,6 +597,9 @@ int main()
     ///testGaussian();
     ///testBasisExpansion();
     ///testPolynomial();
+    ///testFitExactPolynomial();
+    ///testFitNoisyPolynomial();
+    ///testFitNoisyPolynomial2();
 
     return 0;
 }
