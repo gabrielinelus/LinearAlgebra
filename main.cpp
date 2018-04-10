@@ -326,6 +326,26 @@ void measurePrecisionATAI()
     cout << "Correct answer: 1" << endl;
 }
 
+void measurePrecisionGS()
+{
+    Matrix<long double> A, b, Q, R, RI, xmatlab;
+
+    MatrixUtil<long double>::Reader(A, string("precisionA.in"));
+    MatrixUtil<long double>::Reader(b, string("precisionB.in"));
+
+    MatrixUtil<long double>::QRDecomposition(A, Q, R);
+    MatrixUtil<long double>::GaussJordan(R, RI);
+
+    Matrix<long double> x = RI * Q.transpose() * b;
+    MatrixUtil<long double>::Reader(xmatlab, string("precisionTest2.in"));
+
+    cout << setprecision(30) << fixed;
+    cout << "My      answer: " << x.get(14, 0) << endl;
+    cout << "Matlab  answer: " << xmatlab.get(14,0) << endl;
+    cout << "Correct answer: 1" << endl;
+
+}
+
 void measurePrecisionMGS()
 {
     Matrix<long double> A, b, Q, R, RI, xmatlab;
@@ -517,7 +537,7 @@ void testFitNoisyPolynomial()
 
     vector<pair<long double, long double> > points;
     Polynomial<long double> p1(coeff, &gauss);
-    for (int i = -50; i <= 50; ++i) {
+    for (int i = -500000; i <= 500000; ++i) {
         points.push_back({i, p1.evaluate(i)});
     }
 
@@ -553,11 +573,11 @@ void testFitNoisyPolynomial2()
 
     vector<pair<long double, long double> > points;
     Polynomial<long double> p1(coeff, &gauss);
-    for (int i = -10; i <= 10; i += 1) {
+    for (int i = -10000; i <= 10000; i += 1) {
         points.push_back({i, p1.evaluate(i)});
     }
 
-    for (int degree = 1; degree <= 6; ++degree) {
+    for (int degree = 1; degree <= 10; ++degree) {
         /// we choose the degree of line we try to fit
         /// for degree we get degree + 1 features
         Matrix<long double> A(points.size(), degree + 1), x(degree + 1, 0), b(points.size(), 1);
@@ -588,6 +608,7 @@ int main()
     ///clusteringTest();
     ///measureError();
     ///measurePrecisionATAI();
+    ///measurePrecisionGS();
     ///measurePrecisionMGS();
     ///measurePrecisionMGSE();
     ///measurePrecisionInverse(); /// matlab turns to best fit as inverse doesn't exist.
