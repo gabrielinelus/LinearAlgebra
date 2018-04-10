@@ -110,7 +110,7 @@ void MatrixUtil<T>::GaussJordan(Matrix<T> A, Matrix<T> &AI)
             /// we need a new row here
             int j = i;
             while (++j < A.numRows())
-                if(A.get(j, i) == 0)
+                if(A.get(j, i) != 0)
                     break;
             assert( j != A.numRows() && "inverse does not exist" );
             A.rowSwap(i, j);
