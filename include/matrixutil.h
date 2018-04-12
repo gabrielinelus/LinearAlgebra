@@ -52,7 +52,7 @@ bool MatrixUtil<T>::compareEquals(Matrix<T> A, Matrix<T> B, T eps)
         return false;
     for (int i = 0; i < A.numRows(); ++i)
         for (int j = 0; j < A.numCols(); ++j)
-            if (abs(A.get(i, j) - B.get(i, j) > eps)) /// major difference spotted!
+            if (abs(A.get(i, j) - B.get(i, j)) > eps) /// major difference spotted!
             {
                 cout << setprecision(16) << fixed;
                 cout << A.get(i, j) << " vs \n" << B.get(i, j) << "\n";
