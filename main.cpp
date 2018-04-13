@@ -551,7 +551,7 @@ void testFitNoisyPolynomial()
         }
         ///A.print(15);
         ///cerr << "\n---------------------------\n";
-        MatrixUtil<long double>::LeastSquaresQR(A, b, x, false);
+        MatrixUtil<long double>::LeastSquaresQR(A, b, x, true);
         Matrix<long double> y = A*x - b;
         cout << x << "\n Error: ";
         cout << setprecision(10) << fixed;
