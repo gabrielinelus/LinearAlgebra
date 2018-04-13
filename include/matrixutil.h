@@ -88,13 +88,14 @@ void MatrixUtil<T>::QRLosslessDecomposition(Matrix<T> A, Matrix<T> &Q, Matrix<T>
     Q = Matrix<T>(m, n);
     R = Matrix<T>(n, n);
     Matrix<T> V = A;
-    for (int i = 0; i < n; ++i) {
-        R.set(i, i, V(i).frobeniusNorm());
-        Q.setColumn(i, V(i) / R.get(i, i));
-        for (int j = i + 1; j < n; ++j) {
+
+    for (int j = 0; j < n; ++j) {
+        for (int i = 0; i < j; ++i) {
             R.set(i, j, (Q(i).transpose() * V(j)).get(0, 0));
             V.setColumn(j, V(j) - Q(i) * R.get(i, j));
         }
+        R.set(j, j, V(j).frobeniusNorm());
+        Q.setColumn(j, V(j) / R.get(j, j));
     }
 }
 
