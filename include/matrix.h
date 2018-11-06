@@ -85,6 +85,9 @@ class Matrix
     T frobeniusNorm();
     /// Return the entry square norm
 
+    T trace();
+    /// Returns the trace of a matrix
+
 /// Accessors
 
     const void print(int indent) const;
@@ -276,8 +279,23 @@ Matrix<T> Matrix<T>::transpose()
 template <typename T>
 T Matrix<T>::frobeniusNorm()
 {
-    return sqrt((transpose()* (*this)).get(0, 0));
+    T sum = 0;
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            sum += get(i, j) * get(i, j);
+    return sqrt(sum);
 }
+
+template <typename T>
+T Matrix<T>::trace()
+{
+    assert(numRows() == numCols() && "not square matrix!");
+    T sum = 0;
+    for (int i = 0; i < numRows(); ++i)
+        sum += get(i, i);
+    return sum;
+}
+
 /*******************************************************/
 ///                  End of Manipulators              ///
 /*******************************************************/
