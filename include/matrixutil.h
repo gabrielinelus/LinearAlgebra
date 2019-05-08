@@ -61,18 +61,17 @@ class MatrixUtil
 					     MatrixT &W,
 					     MatrixT &Y,
 					     double   accuracy = 0);
-    /**
-     * Given the matrix $A^TA$ (i.e. 'ATA'), and a 'rankK', perform  
-     * Quadratically Regularised PCA (L2-PCA) on matrix A. This will produce 
-     * the matrix 'W' such that $X = AW^T$ and matrix 'Y' such that $XY$ is the
-     * best rank-k approximation of A. The method will use eigen-decomposition.
-     * If 'accuracy' is provided, then the algorithm will use the minimum rank
-     * $k \geq rankK$ which achieves the requested 'accuracy'.  For example
-     * $rankK = rank(A^TA)$ if 100$\%$ accuracy is required.
-     * Complexity: $\Theta(N^3)$ actually about $9N^3$ steps.
-     * Numerical Stability: Good (evaluated by Eigen)
-     */
-
+  /**
+   * Given the matrix $A^TA$ (i.e. 'ATA'), and a 'rankK', perform  
+   * Quadratically Regularised PCA (L2-PCA) on matrix A. This will produce 
+   * the matrix 'W' such that $X = AW^T$ and matrix 'Y' such that $XY$ is the
+   * best rank-k approximation of A. The method will use eigen-decomposition.
+   * If 'accuracy' is provided, then the algorithm will use the minimum rank
+   * $k \geq rankK$ which achieves the requested 'accuracy'.  For example
+   * $rankK = rank(A^TA)$ if 100$\%$ accuracy is required.
+   * Complexity: $\Theta(N^3)$ actually about $9N^3$ steps.
+   * Numerical Stability: Good (evaluated by Eigen)
+   */
 
     static void EigenSparseAlternatingMinimisationIQRPCA(Eigen::SparseMatrix<T>  ATA,
 							 int                     rankK,
@@ -100,14 +99,14 @@ class MatrixUtil
 						  int      iterations = -1);
     /**
      * Given the matrix $A^TA$ (i.e. 'ATA'), and a 'rankK', perform Inlined  
-     * L2-PCA on matrix A. This will produce the eigen matrix 'W' such that
-     *  $X = AW^T$ and the eigen matrix 'Y' such that $XY$ is the best rank-k 
+     * L2-PCA on matrix A. This will produce the eigen matrix 'W' such that 
+     * $X = AW^T$ and the eigen matrix 'Y' such that $XY$ is the best rank-k 
      * approximation of A. If sepcified, the algorithm will perform 'iterations'
      * otherwise it will iterate until the iteration improvement is below 'tau':
-     * if (traceS * (Wold - Wt).squaredNorm() < tau &&
-     *	            (Yold - Yt).squaredNorm() < tau)
+     * if ((Wold - Wt).squaredNorm() < tau &&
+     *	   (Yold - Yt).squaredNorm() < tau)
      *   done = true;
-     * Complexity per iteration: O(N^2*K)
+     * Complexity per iteration: $\Theta(N^2rankK)$ where $N = $'ATA.size()'.
      * Speed: Very fast
      */
 
