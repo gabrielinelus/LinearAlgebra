@@ -8,3 +8,4 @@ How to use:
        - copy the include and src folders to your library
        - include the libraries: matrixutil.h, matrix.h, etc. and since everything is templetised, they're ready to go.
    - For running examples, check the unit tests.
+Note, this library depends on Eigen - install this first. (Check their website to see how to do that)
