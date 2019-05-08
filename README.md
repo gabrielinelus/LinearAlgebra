@@ -9,4 +9,4 @@ How to use:
        - include the libraries: matrixutil.h, matrix.h, etc. and since everything is templetised, they're ready to go.
    - For running examples, check the unit tests.
    
-!Note, this library depends on Eigen - install this first. (Check their website to see how to do that)!
+!Note, this library has algorithms which depend on Eigen - install Eigen library first. (Check their website to see how to do that)!
