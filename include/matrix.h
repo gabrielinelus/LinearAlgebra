@@ -83,8 +83,11 @@ class Matrix
     /// Return the transpose of 'this' Matrix. If it's cached then just returns it.
 
     T frobeniusNorm();
-    /// Return the entry square norm
+    /// Return the frobenius norm (l2 for vectors)
 
+    T squaredNorm();
+    /// Return the entry squared norm (squared frobenius norm / squared l2 norm for vectors)
+    
     T trace();
     /// Returns the trace of a matrix
 
@@ -284,6 +287,16 @@ T Matrix<T>::frobeniusNorm()
         for (int j = 0; j < numCols(); ++j)
             sum += get(i, j) * get(i, j);
     return sqrt(sum);
+}
+
+template <typename T>
+T Matrix<T>::squaredNorm()
+{
+    T sum = 0;
+    for (int i = 0; i < numRows(); ++i)
+        for (int j = 0; j < numCols(); ++j)
+            sum += get(i, j) * get(i, j);
+    return sum;
 }
 
 template <typename T>
